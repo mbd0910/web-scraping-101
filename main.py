@@ -10,6 +10,12 @@ headers = {
 response = httpx.get(url, headers=headers)
 html = HTMLParser(response.text)
 
+def extract_text(html, selector):
+    try:
+        return html.css_first(selector).text()
+    except AttributeError:
+        return None
+
 products = html.css('div.grid-tile')
 
 for product in products:
@@ -21,7 +27,7 @@ for product in products:
         else:
             parts.append(span.text().removeprefix('\n').removesuffix('\n'))
     product_name = str.join(' ', parts)
-    product_price = product.css_first('span.currentprice').text()
+    product_price = extract_text(product, 'span.currentprice')
 
     item = {
         'name': product_name,
