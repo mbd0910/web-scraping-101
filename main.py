@@ -17,24 +17,15 @@ def extract_text(html, selector):
         return None
 
 def remove_new_lines(str: str):
-    return str.replace('\n', '')
+    return str.replace('\n', '').strip()
 
 def parse_page(html):
-    products = html.css('div.grid-tile')
+    products = html.css('div.product-item')
     items = []
 
     for product in products:
-        product_name_spans = product.css('div.product-name span')
-        parts = []
-        for span in product_name_spans:
-            if span.attributes['class'] == 'spacer':
-                parts.append(' / ')
-            else:
-                parts.append(remove_new_lines(span.text()))
-        product_name = str.join(' ', parts)
-        product_price = extract_text(product, 'span.currentprice')
-        if product_price is not None:
-            product_price = remove_new_lines(product_price)
+        product_name = extract_text(product, 'div.product-item-name h2')
+        product_price = remove_new_lines(extract_text(product, 'div.products_price'))
 
         item = {
             'name': product_name,
@@ -46,9 +37,10 @@ def parse_page(html):
     return items
 
 def main():
-    base_url = "https://www.emp.co.uk/band-merch/t-shirts/"
+    base_url = "https://www.metalshop.uk/statues-figures/t/discount/"
     items = parse_page(get_html(base_url))
     print(items)
+    print(len(items))
 
 if __name__ == '__main__':
     main()
