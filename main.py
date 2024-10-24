@@ -39,9 +39,10 @@ def parse_page(html):
 
 def main():
     base_url = "https://www.metalshop.uk/statues-figures/t/discount/pg/"
-    items = parse_page(get_html(base_url, 1))
-    print(items)
-    print(len(items))
+    for i in range(1, 6):
+        items = parse_page(get_html(base_url, i))
+        print(items)
+        print(len(items))
 
 if __name__ == '__main__':
     main()
