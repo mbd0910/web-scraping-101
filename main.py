@@ -1,5 +1,6 @@
 import httpx
 from selectolax.parser import HTMLParser
+import time
 
 def get_html(base_url: str, page: int):
     headers = {
@@ -8,6 +9,11 @@ def get_html(base_url: str, page: int):
 
     url = base_url + str(page)
     response = httpx.get(url, headers=headers, follow_redirects=True)
+    try:
+        response.raise_for_status()
+    except httpx.HTTPStatusError as exc:
+        print(f'Error response {exc.response.status_code} while requesting {exc.request.url!r}')
+        return False
     html = HTMLParser(response.text)
     return html
 
@@ -22,7 +28,6 @@ def remove_new_lines(str: str):
 
 def parse_page(html):
     products = html.css('div.product-item')
-    items = []
 
     for product in products:
         product_name = extract_text(product, 'div.product-item-name h2')
@@ -33,16 +38,22 @@ def parse_page(html):
             'price': product_price
         }
 
-        items.append(item)
-
-    return items
+        yield item
 
 def main():
     base_url = "https://www.metalshop.uk/statues-figures/t/discount/pg/"
-    for i in range(1, 6):
-        items = parse_page(get_html(base_url, i))
-        print(items)
-        print(len(items))
+    for page in range(1, 6):
+        print(f'Gathering page {page}')
+        html = get_html(base_url, page)
+        if html is False:
+            break
+        data = parse_page(html)
+
+        for item in data:
+            print(item)
+
+        time.sleep(1)
+
 
 if __name__ == '__main__':
     main()
