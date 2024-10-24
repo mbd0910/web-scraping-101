@@ -1,14 +1,12 @@
 import httpx
 from selectolax.parser import HTMLParser
 
-def get_html():
-    url = "https://www.emp.co.uk/band-merch/t-shirts/"
-
+def get_html(base_url: str):
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
     }
 
-    response = httpx.get(url, headers=headers)
+    response = httpx.get(base_url, headers=headers)
     html = HTMLParser(response.text)
     return html
 
@@ -48,7 +46,8 @@ def parse_page(html):
     return items
 
 def main():
-    items = parse_page(get_html())
+    base_url = "https://www.emp.co.uk/band-merch/t-shirts/"
+    items = parse_page(get_html(base_url))
     print(items)
 
 if __name__ == '__main__':
