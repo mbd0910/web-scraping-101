@@ -2,6 +2,13 @@ import httpx
 from selectolax.parser import HTMLParser
 import time
 from urllib.parse import urljoin
+from dataclasses import dataclass
+
+@dataclass
+class Product:
+    name: str | None
+    price: str | None
+    metal_points: float | None
 
 def get_html(url: str, **kwargs):
     headers = {
@@ -34,8 +41,16 @@ def parse_page(html):
     for product in products:
         yield urljoin("https://www.metalshop.uk/", product.css_first('a').attributes['href'])
 
+def parse_product_page(html):
+    return Product(
+        name=extract_text(html, 'div.products_header h1.first'),
+        price=extract_text(html, 'div.price span'),
+        metal_points=extract_text(html, 'span#detail-credits-amount')
+    )
+
 def main():
     base_url = "https://www.metalshop.uk/statues-figures/t/discount/pg/"
+    products = []
     for page in range(1, 2):
         print(f'Gathering page {page}')
         html = get_html(base_url, page=page)
@@ -46,8 +61,11 @@ def main():
         for product_url in product_urls:
             print(product_url)
             html = get_html(product_url)
-            print(html.css_first('title'))
+            products.append(parse_product_page(html))
             time.sleep(1)
+
+    for product in products:
+        print(product)
 
 
 
