@@ -1,8 +1,11 @@
+import time
+from dataclasses import asdict, dataclass, fields
+from urllib.parse import urljoin
+
 import httpx
 from selectolax.parser import HTMLParser
-import time
-from urllib.parse import urljoin
-from dataclasses import dataclass
+import json
+import csv
 
 @dataclass
 class Product:
@@ -42,11 +45,25 @@ def parse_page(html):
         yield urljoin("https://www.metalshop.uk/", product.css_first('a').attributes['href'])
 
 def parse_product_page(html):
-    return Product(
+    product = Product(
         name=extract_text(html, 'div.products_header h1.first'),
         price=extract_text(html, 'div.price span'),
         metal_points=extract_text(html, 'span#detail-credits-amount')
     )
+    return asdict(product)
+
+def export_to_json(products):
+    with open('products.json', 'w', encoding='utf-8') as f:
+        json.dump(products, f, ensure_ascii=False, indent=4)
+    print('Saved to JSON')
+
+def export_to_csv(products):
+    field_names = [field.name for field in fields(Product)]
+    with open('products.csv', 'w') as f:
+        writer = csv.DictWriter(f, field_names)
+        writer.writeheader()
+        writer.writerows(products)
+    print('Saved to CSV')
 
 def main():
     base_url = "https://www.metalshop.uk/statues-figures/t/discount/pg/"
@@ -64,8 +81,8 @@ def main():
             products.append(parse_product_page(html))
             time.sleep(1)
 
-    for product in products:
-        print(product)
+    export_to_json(products)
+    export_to_csv(products)
 
 
 
