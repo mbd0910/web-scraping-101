@@ -1,11 +1,12 @@
+import csv
+import json
 import time
 from dataclasses import asdict, dataclass, fields
 from urllib.parse import urljoin
 
 import httpx
 from selectolax.parser import HTMLParser
-import json
-import csv
+
 
 @dataclass
 class Product:
@@ -31,7 +32,8 @@ def get_html(url: str, **kwargs):
 
 def extract_text(html, selector):
     try:
-        return html.css_first(selector).text()
+        text = html.css_first(selector).text()
+        return clean_data(text)
     except AttributeError:
         return None
 
@@ -64,6 +66,19 @@ def export_to_csv(products):
         writer.writeheader()
         writer.writerows(products)
     print('Saved to CSV')
+
+def append_to_csv(products):
+    field_names = [field.name for field in fields(Product)]
+    with open('append_csv', 'a') as f:
+        writer = csv.DictWriter(f, field_names)
+        writer.writerows(products)
+    print('Appended to CSV')
+
+def clean_data(value: str):
+    chars_to_remove = ['\n', '\t']
+    for char in chars_to_remove:
+        value = value.replace(char, '')
+    return value.strip()
 
 def main():
     base_url = "https://www.metalshop.uk/statues-figures/t/discount/pg/"
