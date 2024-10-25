@@ -1,6 +1,7 @@
 import httpx
 from selectolax.parser import HTMLParser
 import time
+from urllib.parse import urljoin
 
 def get_html(base_url: str, page: int):
     headers = {
@@ -30,19 +31,11 @@ def parse_page(html):
     products = html.css('div.product-item')
 
     for product in products:
-        product_name = extract_text(product, 'div.product-item-name h2')
-        product_price = remove_new_lines(extract_text(product, 'div.products_price'))
-
-        item = {
-            'name': product_name,
-            'price': product_price
-        }
-
-        yield item
+        yield urljoin("https://www.metalshop.uk/", product.css_first('a').attributes['href'])
 
 def main():
     base_url = "https://www.metalshop.uk/statues-figures/t/discount/pg/"
-    for page in range(1, 6):
+    for page in range(1, 2):
         print(f'Gathering page {page}')
         html = get_html(base_url, page)
         if html is False:
