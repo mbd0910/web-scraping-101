@@ -24,6 +24,10 @@ https://www.youtube.com/watch?v=hV5k1XbcZXA
 
 https://www.youtube.com/watch?v=Hg_iLFURnAk
 
+## Coffee based market research
+
+https://www.youtube.com/watch?v=skT4gSdiP9Q&list=PLGd4FtMMa-FrcGzWDOubNg8rcvxrP-j0z&index=2
+
 ### Notes
 
 The `requirements.txt` file contains dependencies across all projects, so is arguably overkill for each individual 
